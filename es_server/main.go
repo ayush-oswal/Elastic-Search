@@ -51,7 +51,7 @@ func createBook(c *fiber.Ctx) error {
 
 func getBooks(c *fiber.Ctx) error {
 
-	searchResult, err := esClient.Search().Index("books").Do(context.Background())
+	searchResult, err := esClient.Search().Index("books").Size(100).Do(context.Background())
 
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": err.Error()})

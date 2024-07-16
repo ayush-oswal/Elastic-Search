@@ -17,23 +17,30 @@ export default function Home() {
   const [summary, setSummary] = useState('');
   const [query, setQuery] = useState('');
   const [searchResults, setSearchResults] = useState<Book[]>([]);
+  const [timeTaken, setTimeTaken] = useState<number | null>(null);
 
   const fetchBooks = async () => {
     const response = await axios.get('/api/books');
     setBooks(response.data);
+    console.log(books)
   };
 
   const createBook = async () => {
     await axios.post('/api/books', { title, author, summary });
-    fetchBooks();
     setTitle('');
     setAuthor('');
     setSummary('');
+    setTimeout(()=>{
+      fetchBooks();
+    },1000)
   };
 
   const searchBooks = async () => {
+    const start = new Date().getTime();
     const response = await axios.get(`/api/search?q=${query}`);
+    const end = new Date().getTime();
     setSearchResults(response.data);
+    setTimeTaken(end - start);
   };
 
   useEffect(() => {
@@ -73,10 +80,11 @@ export default function Home() {
         </button>
       </div>
       <div className="flex">
-        <div className="flex w-1/2 border-2 p-3 border-black rounded-md items-center justify-center overflow-auto">
+        <div className="flex flex-col w-1/2 border-2 p-3 border-black rounded-md items-center justify-center">
           <div className="text-xl font-bold mb-4">Books</div>
+          <div className='max-h-80 overflow-y-scroll'>
           <ul className="space-y-4">
-            {books.map((book) => (
+            {books?.map((book) => (
               <li key={book.id} className="p-4 border rounded">
                 <h3 className="text-lg font-semibold">{book.title}</h3>
                 <p className="text-sm">Author: {book.author}</p>
@@ -84,6 +92,7 @@ export default function Home() {
               </li>
             ))}
           </ul>
+          </div>
         </div>
         <div className="w-1/2 pl-4 overflow-auto">
           <input
@@ -93,14 +102,19 @@ export default function Home() {
             onChange={(e) => setQuery(e.target.value)}
             className="px-4 py-2 border rounded w-full mb-4"
           />
+          {timeTaken !== null && (
+            <div className="text-lg font-semibold text-green-600 mt-2">
+              Search completed in {timeTaken} ms !!
+            </div>
+          )}
           <button
             onClick={searchBooks}
-            className="px-4 py-2 bg-green-500 text-white rounded w-full"
+            className="px-4 py-2 bg-blue-700 text-white rounded w-full"
           >
             Search
           </button>
           <ul className="mt-4 space-y-4">
-            {searchResults.map((book) => (
+            {searchResults?.map((book) => (
               <li key={book.id} className="p-4 border rounded">
                 <h3 className="text-lg font-semibold">{book.title}</h3>
                 <p className="text-sm">Author: {book.author}</p>
